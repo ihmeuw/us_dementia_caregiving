@@ -1,0 +1,307 @@
+# Number plugging - results section 3.5
+# Author: Michael Breshock
+
+rm(list = ls())
+
+# load in libraries
+library(dplyr)
+library(data.table)
+
+
+source("FILEPATH/helper_functions.R"))
+
+# load data
+low_growth = fread(paste0(FILEPATH,"low_growth_cost_draws.csv"))
+high_growth = fread(paste0(FILEPATH,"high_growth_cost_draws.csv"))
+# these files created in: 
+# cost_forecasts.R
+
+# summarize low and high growth draws: 
+low_sum = low_growth[,.(total_rc_mean = mean(total_rc), 
+                        total_rc_lower = quantile(total_rc, 0.025),
+                        total_rc_upper = quantile(total_rc, 0.975),
+                        total_oc_mean = mean(total_oc), 
+                        total_oc_lower = quantile(total_oc, 0.025),
+                        total_oc_upper = quantile(total_oc, 0.975),
+                        pc_rc_mean = mean(per_cap_rc),  # pc = per-capita
+                        pc_rc_lower = quantile(per_cap_rc, 0.025),
+                        pc_rc_upper = quantile(per_cap_rc, 0.975), 
+                        pc_oc_mean = mean(per_cap_oc),
+                        pc_oc_lower = quantile(per_cap_oc, 0.025),
+                        pc_oc_upper = quantile(per_cap_oc, 0.975)), 
+                     by = "year_id"]
+
+high_sum = high_growth[,.(total_rc_mean = mean(total_rc), 
+                          total_rc_lower = quantile(total_rc, 0.025),
+                          total_rc_upper = quantile(total_rc, 0.975),
+                          total_oc_mean = mean(total_oc), 
+                          total_oc_lower = quantile(total_oc, 0.025),
+                          total_oc_upper = quantile(total_oc, 0.975),
+                          pc_rc_mean = mean(per_cap_rc),  # pc = per-capita
+                          pc_rc_lower = quantile(per_cap_rc, 0.025),
+                          pc_rc_upper = quantile(per_cap_rc, 0.975), 
+                          pc_oc_mean = mean(per_cap_oc),
+                          pc_oc_lower = quantile(per_cap_oc, 0.025),
+                          pc_oc_upper = quantile(per_cap_oc, 0.975)), 
+                       by = "year_id"]
+
+# Sentence 1: In 2019, the total annual replacement cost of informal dementia 
+# care was $XX billion (XX-XX), and the total annual cost in terms of
+# caregivers’ forgone wages was $XX billion (XX-XX). 
+
+tot_rc2019 = round_num(low_sum[year_id==2019]$total_rc_mean, 
+                       type = "bill", lancet = F)
+tot_rc2019_lower = round_num(low_sum[year_id==2019]$total_rc_lower, 
+                             type = "bill", lancet = F)
+tot_rc2019_upper = round_num(low_sum[year_id==2019]$total_rc_upper, 
+                             type = "bill", lancet = F)
+
+tot_oc2019 = round_num(low_sum[year_id==2019]$total_oc_mean, 
+                       type = "bill", lancet = F)
+tot_oc2019_lower = round_num(low_sum[year_id==2019]$total_oc_lower, 
+                             type = "bill", lancet = F)
+tot_oc2019_upper = round_num(low_sum[year_id==2019]$total_oc_upper, 
+                             type = "bill", lancet = F)
+
+paste0("In 2019, the total annual replacement cost of informal dementia care was $",
+       tot_rc2019, " billion (", tot_rc2019_lower, "-", tot_rc2019_upper, "), ",
+       "and the total annual cost in terms of caregivers' forgone wages was $", 
+       tot_oc2019, " billion (", tot_oc2019_lower, "-", tot_oc2019_upper, ").")
+
+# checking that 2019 values for low growth and high growth match: 
+
+hi_rc2019 = round_num(high_sum[year_id==2019]$total_rc_mean, 
+                       type = "bill", lancet = F)
+hi_rc2019_lower = round_num(high_sum[year_id==2019]$total_rc_lower, 
+                             type = "bill", lancet = F)
+hi_rc2019_upper = round_num(high_sum[year_id==2019]$total_rc_upper, 
+                             type = "bill", lancet = F)
+
+hi_oc2019 = round_num(high_sum[year_id==2019]$total_oc_mean, 
+                       type = "bill", lancet = F)
+hi_oc2019_lower = round_num(high_sum[year_id==2019]$total_oc_lower, 
+                             type = "bill", lancet = F)
+hi_oc2019_upper = round_num(high_sum[year_id==2019]$total_oc_upper, 
+                             type = "bill", lancet = F)
+
+paste0("In 2019, the total annual replacement cost of informal dementia care was $",
+       hi_rc2019, " billion (", hi_rc2019_lower, "-", hi_rc2019_upper, "), ",
+       "and the total annual cost in terms of caregivers' forgone wages was $", 
+       hi_oc2019, " billion (", hi_oc2019_lower, "-", hi_oc2019_upper, ").")
+
+
+### create tables: 
+## Low-Growth: 
+# view total cost estimates in billions of $:
+cat("[LOW GROWTH] Total Replacement Cost (billions of $): \n", 
+    "2019 | ", round_num(low_sum[year_id==2019]$total_rc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(low_sum[year_id==2019]$total_rc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(low_sum[year_id==2019]$total_rc_upper, 
+              type = "bill", lancet = F), ")\n", 
+    "2030 | ", round_num(low_sum[year_id==2030]$total_rc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(low_sum[year_id==2030]$total_rc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(low_sum[year_id==2030]$total_rc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "2040 | ", round_num(low_sum[year_id==2040]$total_rc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(low_sum[year_id==2040]$total_rc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(low_sum[year_id==2040]$total_rc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "2050 | ", round_num(low_sum[year_id==2050]$total_rc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(low_sum[year_id==2050]$total_rc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(low_sum[year_id==2050]$total_rc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "Total Opportunity Cost (billions of $): \n", 
+    "2019 | ", round_num(low_sum[year_id==2019]$total_oc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(low_sum[year_id==2019]$total_oc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(low_sum[year_id==2019]$total_oc_upper, 
+              type = "bill", lancet = F), ")\n", 
+    "2030 | ", round_num(low_sum[year_id==2030]$total_oc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(low_sum[year_id==2030]$total_oc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(low_sum[year_id==2030]$total_oc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "2040 | ", round_num(low_sum[year_id==2040]$total_oc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(low_sum[year_id==2040]$total_oc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(low_sum[year_id==2040]$total_oc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "2050 | ", round_num(low_sum[year_id==2050]$total_oc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(low_sum[year_id==2050]$total_oc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(low_sum[year_id==2050]$total_oc_upper, 
+              type = "bill", lancet = F), ")\n",
+    sep = "")
+
+# view per-capita cost estimates:
+cat("[LOW GROWTH] Per-capita Replacement Cost ($): \n", 
+    "2019 | ", round_num(low_sum[year_id==2019]$pc_rc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(low_sum[year_id==2019]$pc_rc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(low_sum[year_id==2019]$pc_rc_upper, 
+              type = "dollar", lancet = F), ")\n", 
+    "2030 | ", round_num(low_sum[year_id==2030]$pc_rc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(low_sum[year_id==2030]$pc_rc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(low_sum[year_id==2030]$pc_rc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "2040 | ", round_num(low_sum[year_id==2040]$pc_rc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(low_sum[year_id==2040]$pc_rc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(low_sum[year_id==2040]$pc_rc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "2050 | ", round_num(low_sum[year_id==2050]$pc_rc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(low_sum[year_id==2050]$pc_rc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(low_sum[year_id==2050]$pc_rc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "Per-capita Opportunity Cost ($): \n", 
+    "2019 | ", round_num(low_sum[year_id==2019]$pc_oc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(low_sum[year_id==2019]$pc_oc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(low_sum[year_id==2019]$pc_oc_upper, 
+              type = "dollar", lancet = F), ")\n", 
+    "2030 | ", round_num(low_sum[year_id==2030]$pc_oc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(low_sum[year_id==2030]$pc_oc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(low_sum[year_id==2030]$pc_oc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "2040 | ", round_num(low_sum[year_id==2040]$pc_oc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(low_sum[year_id==2040]$pc_oc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(low_sum[year_id==2040]$pc_oc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "2050 | ", round_num(low_sum[year_id==2050]$pc_oc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(low_sum[year_id==2050]$pc_oc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(low_sum[year_id==2050]$pc_oc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    sep = "")
+
+## High-growth: 
+# view total cost estimates in billions of $:
+cat("[HIGH GROWTH] Total Replacement Cost (billions of $): \n", 
+    "2019 | ", round_num(high_sum[year_id==2019]$total_rc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(high_sum[year_id==2019]$total_rc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(high_sum[year_id==2019]$total_rc_upper, 
+              type = "bill", lancet = F), ")\n", 
+    "2030 | ", round_num(high_sum[year_id==2030]$total_rc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(high_sum[year_id==2030]$total_rc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(high_sum[year_id==2030]$total_rc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "2040 | ", round_num(high_sum[year_id==2040]$total_rc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(high_sum[year_id==2040]$total_rc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(high_sum[year_id==2040]$total_rc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "2050 | ", round_num(high_sum[year_id==2050]$total_rc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(high_sum[year_id==2050]$total_rc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(high_sum[year_id==2050]$total_rc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "Total Opportunity Cost (billions of $): \n", 
+    "2019 | ", round_num(high_sum[year_id==2019]$total_oc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(high_sum[year_id==2019]$total_oc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(high_sum[year_id==2019]$total_oc_upper, 
+              type = "bill", lancet = F), ")\n", 
+    "2030 | ", round_num(high_sum[year_id==2030]$total_oc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(high_sum[year_id==2030]$total_oc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(high_sum[year_id==2030]$total_oc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "2040 | ", round_num(high_sum[year_id==2040]$total_oc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(high_sum[year_id==2040]$total_oc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(high_sum[year_id==2040]$total_oc_upper, 
+              type = "bill", lancet = F), ")\n",
+    "2050 | ", round_num(high_sum[year_id==2050]$total_oc_mean, 
+                         type = "bill", lancet = F), " (", 
+    round_num(high_sum[year_id==2050]$total_oc_lower, 
+              type = "bill", lancet = F), "-", 
+    round_num(high_sum[year_id==2050]$total_oc_upper, 
+              type = "bill", lancet = F), ")\n",
+    sep = "")
+
+# view per-capita cost estimates:
+cat("[HIGH GROWTH] Per-capita Replacement Cost ($): \n", 
+    "2019 | ", round_num(high_sum[year_id==2019]$pc_rc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(high_sum[year_id==2019]$pc_rc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(high_sum[year_id==2019]$pc_rc_upper, 
+              type = "dollar", lancet = F), ")\n", 
+    "2030 | ", round_num(high_sum[year_id==2030]$pc_rc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(high_sum[year_id==2030]$pc_rc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(high_sum[year_id==2030]$pc_rc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "2040 | ", round_num(high_sum[year_id==2040]$pc_rc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(high_sum[year_id==2040]$pc_rc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(high_sum[year_id==2040]$pc_rc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "2050 | ", round_num(high_sum[year_id==2050]$pc_rc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(high_sum[year_id==2050]$pc_rc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(high_sum[year_id==2050]$pc_rc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "Per-capita Opportunity Cost ($): \n", 
+    "2019 | ", round_num(high_sum[year_id==2019]$pc_oc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(high_sum[year_id==2019]$pc_oc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(high_sum[year_id==2019]$pc_oc_upper, 
+              type = "dollar", lancet = F), ")\n", 
+    "2030 | ", round_num(high_sum[year_id==2030]$pc_oc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(high_sum[year_id==2030]$pc_oc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(high_sum[year_id==2030]$pc_oc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "2040 | ", round_num(high_sum[year_id==2040]$pc_oc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(high_sum[year_id==2040]$pc_oc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(high_sum[year_id==2040]$pc_oc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    "2050 | ", round_num(high_sum[year_id==2050]$pc_oc_mean, 
+                         type = "dollar", lancet = F), " (", 
+    round_num(high_sum[year_id==2050]$pc_oc_lower, 
+              type = "dollar", lancet = F), "-", 
+    round_num(high_sum[year_id==2050]$pc_oc_upper, 
+              type = "dollar", lancet = F), ")\n",
+    sep = "")
+
